@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Profile</title>
+</head>
+<body>
+    <h2>Welcome, {{ request.user.first_name }} {{ request.user.last_name }}!</h2>
+    <p><strong>Email:</strong> {{ request.user.email }}</p>
+    <p><strong>Mobile Number:</strong> {{ request.user.userprofile.mobile_number }}</p>
+    <p><strong>Gender:</strong> {{ request.user.userprofile.gender }}</p>
+    <p><strong>Birthdate:</strong> {{ request.user.userprofile.birthdate }}</p>
+    <p><strong>Hobbies:</strong> {{ request.user.userprofile.hobbies }}</p>
+    
+    <br>
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Log Out</button>
+    </form>
+</body>
+</html>
