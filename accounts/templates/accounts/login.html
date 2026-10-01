@@ -27,6 +27,7 @@
                 <div class="col-md-6 col-lg-7 d-flex align-items-center">
                   <div class="card-body p-4 p-lg-5 text-black">
 
+                    <!-- 1. Main Username/Password Login Form -->
                     <form method="post">
                       {% csrf_token %}
 
@@ -48,7 +49,7 @@
                           </div>
                       {% endif %}
 
-                      <!-- Dynamic Form Fields Loop (Using widgets from forms.py) -->
+                      <!-- Dynamic Form Fields Loop -->
                       {% for field in form %}
                           <div class="mb-4">
                               {{ field.label_tag }}
@@ -67,31 +68,38 @@
                       <div class="pt-1 mb-4">
                         <button class="btn btn-dark btn-lg w-100 fw-semibold" type="submit">Login</button>
                       </div>
+                    </form> 
 
-                      <!-- Social Logins Section -->
-                      <div class="text-center mb-4">
-                        <p class="text-muted small mb-2">or connect with social accounts</p>
-                        <div class="d-flex justify-content-between gap-2">
-                            <a href="#!" class="btn btn-outline-danger btn-sm flex-grow-1 py-2">
-                                <i class="fa-brands fa-google me-1"></i> Google
-                            </a>
-                            <a href="#!" class="btn btn-outline-dark btn-sm flex-grow-1 py-2">
-                                <i class="fa-brands fa-github me-1"></i> GitHub
-                            </a>
-                            <a href="#!" class="btn btn-outline-primary btn-sm flex-grow-1 py-2">
-                                <i class="fa-brands fa-linkedin me-1"></i> LinkedIn
-                            </a>
-                        </div>
-                      </div>
+                    <!-- 2. Social Logins Section (Independent of the main form) -->
+                    <div class="text-center mb-4">
+                      <p class="text-muted small mb-2">or connect with social accounts</p>
+                      <div class="d-flex justify-content-between gap-2">
+                          
+                          <!-- Google Login Standalone Form (POST request required by python-social-auth) -->
+                          <form action="{% url 'social:begin' 'google-oauth2' %}" method="post" class="flex-grow-1 d-flex mb-0">
+                              {% csrf_token %}
+                              <button type="submit" class="btn btn-outline-danger btn-sm w-100 py-2">
+                                  <i class="fa-brands fa-google me-1"></i> Google
+                              </button>
+                          </form>
 
-                      <!-- Footer Links -->
-                      <div class="d-flex justify-content-between align-items-center">
-                          <a class="small text-muted text-decoration-none" href="#!">Forgot password?</a>
-                          <a class="small text-muted text-decoration-none" href="{% url 'signup' %}">Register here</a>
+                          <!-- GitHub Login -->
+                          <a href="#!" class="btn btn-outline-dark btn-sm flex-grow-1 py-2">
+                              <i class="fa-brands fa-github me-1"></i> GitHub
+                          </a>
+
+                          <!-- LinkedIn Login -->
+                          <a href="#!" class="btn btn-outline-primary btn-sm flex-grow-1 py-2">
+                              <i class="fa-brands fa-linkedin me-1"></i> LinkedIn
+                          </a>
                       </div>
-                      
-                  
-                    </form>
+                    </div>
+
+                    <!-- Footer Links -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a class="small text-muted text-decoration-none" href="{% url 'password_reset' %}">Forgot password?</a>
+                        <a class="small text-muted text-decoration-none" href="{% url 'signup' %}">Register here</a>
+                    </div>
 
                   </div>
                 </div>
