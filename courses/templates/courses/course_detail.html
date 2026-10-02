@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ object.course_title }}</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons (Optional for extra polish) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body class="bg-body-secondary">
+
+    <!-- Navbar / Back Link Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'course_list' %}"><i class="bi bi-arrow-left"></i> Back to Courses</a>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row g-5">
+            <!-- Left Column: Course Image & Quick Meta -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 mb-4">
+                    {% if object.course_image %}
+                        <img src="{{ object.course_image.url }}" alt="{{ object.course_title }}" class="card-img-top rounded-top" style="height: 250px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded-top" style="height: 250px;">No Image Available</div>
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <span class="badge bg-primary p-2 fs-6">Category: {{ object.category }}</span>
+                            <span class="badge bg-secondary p-2 fs-6">Duration: {{ object.duration }}</span>
+                        </div>
+                        <hr>
+                        <p class="text-muted mb-0"><small><strong>Instructor:</strong> {{ object.instructor.username }}</small></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Title, Description, and Schedule -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 p-4 mb-4">
+                    <h1 class="fw-bold mb-3">{{ object.course_title }}</h1>
+                    <h4 class="text-secondary mb-3">About This Course</h4>
+                    <p class="lead text-muted" style="white-space: pre-line;">{{ object.description }}</p>
+                </div>
+
+                <div class="card shadow-sm border-0 p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-calendar-event"></i> Course Schedule & Timeline</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span><strong>Enrollment Period</strong></span>
+                            <span class="text-muted">{{ object.enrollment_start_date|date:"M d, Y, H:i" }} &mdash; {{ object.enrollment_end_date|date:"M d, Y, H:i" }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <span><strong>Course Runtime</strong></span>
+                            <span class="text-muted">{{ object.course_start_date|date:"M d, Y, H:i" }} &mdash; {{ object.course_end_date|date:"M d, Y, H:i" }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
