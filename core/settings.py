@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",
     "courses",
+    "enrollment",
     'social_django',    
 ]
 
@@ -154,8 +155,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = '/accounts/profile/'
-LOGOUT_REDIRECT_URL = 'login'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -178,3 +179,8 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     'https://www.googleapis.com/auth/userinfo.profile',
 ]
 
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Connects Celery to local Redis server broker
+CELERY_ACCEPT_CONTENT = ['json']  # Restricts accepted task data formats to JSON only
+CELERY_TASK_SERIALIZER = 'json'  # Serializes outgoing task payloads into JSON format

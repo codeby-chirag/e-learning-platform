@@ -11,13 +11,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="bg-info-subtle">
-
+    
     <!-- Header/Navbar -->
     <header class="p-3 text-bg-dark"> 
         <div class="container"> 
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start"> 
                 <!-- Logo -->
-                <a href="#" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none me-3"> 
+                <a href="{% url 'home' %}" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none me-3"> 
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-mortarboard-fill text-warning me-2" viewBox="0 0 16 16">
                         <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.14 3.742a.5.5 0 0 0 0 .882l7.14 3.742a.5.5 0 0 0 .422 0l7.14-3.742a.5.5 0 0 0 0-.882z"/>
                         <path d="M4.176 9.032a.5.5 0 0 0-.656.327 5.5 5.5 0 0 0-.294 2.058c.244 1.954 1.948 3.583 3.974 3.583 2.026 0 3.73-1.629 3.974-3.583a5.5 5.5 0 0 0-.294-2.058.5.5 0 0 0-.656-.327 4.5 4.5 0 0 1-.502 2.012c-.438.77-1.192 1.438-2.522 1.438s-2.084-.669-2.522-1.438a4.5 4.5 0 0 1-.502-2.012z"/>
@@ -27,21 +27,25 @@
                 
                 <!-- Navigation -->
                 <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0"> 
-                    <li><a href="#" class="nav-link px-2 text-warning fw-bold">Home</a></li> 
-                    <li><a href="#" class="nav-link px-2 text-white opacity-75">Courses</a></li> 
-                    <li><a href="#" class="nav-link px-2 text-white opacity-75">FAQs</a></li> 
-                    <li><a href="#" class="nav-link px-2 text-white opacity-75">About</a></li> 
+                    <li><a href="{% url 'home' %}" class="nav-link px-2 text-warning fw-bold">Home</a></li> 
+                    {% comment %} <li><a href="{% url 'course_list' %}" class="nav-link px-2 text-white opacity-75">Courses</a></li>  {% endcomment %}
+                    <li><a href="{% url 'course_list' %}" class="nav-link px-2 text-white opacity-75">Courses</a></li>
+                    {% comment %} <li><a href="#" class="nav-link px-2 text-white opacity-75">FAQs</a></li> 
+                    <li><a href="#" class="nav-link px-2 text-white opacity-75">About</a></li>  {% endcomment %}
+                    <li><a href="{% url 'student_dashboard' %}" class="nav-link px-2 text-white opacity-75">My Courses</a></li>
                 </ul> 
 
-                <!-- Auth Buttons -->
-                {% comment %} <div class="text-end"> 
-                    <button type="button" class="btn btn-outline-light me-2">Login</button> 
-                    <button type="button" class="btn btn-warning fw-semibold">Sign-up</button> 
-                </div>  {% endcomment %}
-
+                <!-- Auth Buttons / Conditional Logout -->
                 <div class="text-end"> 
-                    <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Login</a> 
-                    <a href="{% url 'signup' %}" class="btn btn-warning fw-semibold">Sign-up</a> 
+                    {% if request.user.is_authenticated %}
+                        <form action="{% url 'logout' %}" method="post" class="mb-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm px-3">Logout</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Login</a> 
+                        <a href="{% url 'signup' %}" class="btn btn-warning fw-semibold">Sign-up</a> 
+                    {% endif %}
                 </div>
             </div> 
         </div> 
@@ -52,17 +56,14 @@
         <div class="container text-center py-5">
             <p class="fs-5 text-uppercase tracking-wider text-warning fw-semibold mb-2">Ready to Learn Something New</p>
             <h1 class="display-3 fw-bold mb-4">Master New Skills Online <br>Anytime, Anywhere</h1>
-            <div class="d-flex gap-3 justify-content-center">
-                {% comment %} <a class="btn btn-warning btn-lg px-4 fw-semibold" href="#courses">
-                    <i class="fa-solid fa-check me-2"></i>Apply Now
-                </a> {% endcomment %}
+            {% comment %} <div class="d-flex gap-3 justify-content-center">
                 <a class="btn btn-warning btn-lg px-4 fw-semibold" href="{% url 'signup' %}">
                     <i class="fa-solid fa-check me-2"></i>Apply Now
                 </a>
                 <a class="btn btn-outline-light btn-lg px-4" href="#contact">
                     <i class="fa-solid fa-envelope me-2"></i>Contact Us
                 </a>
-            </div>
+            </div> {% endcomment %}
         </div> 
     </div>
 
@@ -173,7 +174,7 @@
     </div>
 
     <!-- Stats & Trusted Partners Section -->
-    <div class="container py-5 my-5 bg-white rounded shadow-sm">
+    {% comment %} <div class="container py-5 my-5 bg-white rounded shadow-sm">
         <div class="row align-items-center g-5 px-4">
             <div class="col-lg-6">
                 <div class="row g-4 text-center">
@@ -216,7 +217,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> {% endcomment %}
 
     <!-- Footer Section -->
     <footer class="bg-dark text-white pt-5 pb-4 mt-5">
@@ -231,15 +232,15 @@
                         <span class="fs-4 fw-bold text-white">EduParadise</span>
                     </div>
                     <p class="text-secondary small">Empowering global learners with modern data science, interactive engineering pipelines, and production-grade curricula.</p>
-                    <div class="d-flex gap-3 mt-3 fs-5">
+                    {% comment %} <div class="d-flex gap-3 mt-3 fs-5">
                         <a href="#" class="text-secondary text-decoration-none hover-warning"><i class="fa-brands fa-linkedin"></i></a>
                         <a href="#" class="text-secondary text-decoration-none hover-warning"><i class="fa-brands fa-x-twitter"></i></a>
                         <a href="#" class="text-secondary text-decoration-none hover-warning"><i class="fa-brands fa-github"></i></a>
                         <a href="#" class="text-secondary text-decoration-none hover-warning"><i class="fa-brands fa-youtube"></i></a>
-                    </div>
+                    </div> {% endcomment %}
                 </div>
 
-                <div class="col-lg-2 col-6 col-md-3">
+                {% comment %} <div class="col-lg-2 col-6 col-md-3">
                     <h5 class="fw-bold mb-3 text-warning fs-6 text-uppercase">Explore</h5>
                     <ul class="list-unstyled d-flex flex-column gap-2 small">
                         <li><a href="#" class="text-secondary text-decoration-none">All Courses</a></li>
@@ -247,9 +248,9 @@
                         <li><a href="#" class="text-secondary text-decoration-none">Expert Mentors</a></li>
                         <li><a href="#" class="text-secondary text-decoration-none">Enterprise Training</a></li>
                     </ul>
-                </div>
+                </div> {% endcomment %}
 
-                <div class="col-lg-2 col-6 col-md-3">
+                {% comment %} <div class="col-lg-2 col-6 col-md-3">
                     <h5 class="fw-bold mb-3 text-warning fs-6 text-uppercase">Support</h5>
                     <ul class="list-unstyled d-flex flex-column gap-2 small">
                         <li><a href="#" class="text-secondary text-decoration-none">Help Center</a></li>
@@ -257,23 +258,23 @@
                         <li><a href="#" class="text-secondary text-decoration-none">Privacy Policy</a></li>
                         <li><a href="#" class="text-secondary text-decoration-none">Terms of Service</a></li>
                     </ul>
-                </div>
+                </div> {% endcomment %}
 
-                <div class="col-lg-4 col-md-12">
+                {% comment %} <div class="col-lg-4 col-md-12">
                     <h5 class="fw-bold mb-3 text-white fs-6 text-uppercase">Stay Updated</h5>
                     <p class="text-secondary small">Subscribe to receive regular module releases, syllabus updates, and free technical workshops.</p>
                     <form class="d-flex gap-2 mt-3">
                         <input type="email" class="form-control bg-dark border-secondary text-white" placeholder="Your email address" required>
                         <button class="btn btn-warning px-3 fw-bold text-nowrap" type="submit">Subscribe</button>
                     </form>
-                </div>
+                </div> {% endcomment %}
             </div>
 
             <div class="d-flex flex-column flex-sm-row justify-content-between pt-4 mt-4 border-top border-secondary text-secondary small">
                 <p>&copy; 2026 EduParadise Inc. All rights reserved.</p>
-                <div class="d-flex gap-3">
+                {% comment %} <div class="d-flex gap-3">
                     <span><i class="fa-solid fa-globe me-1"></i> English (US)</span>
-                </div>
+                </div> {% endcomment %}
             </div>
         </div>
     </footer>

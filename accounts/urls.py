@@ -22,7 +22,7 @@ urlpatterns = [
             authentication_form=CustomAuthenticationForm
         ), name='login'),
     
-    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+    path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     
 
     path('password-reset/', auth_views.PasswordResetView.as_view(template_name='accounts/password_reset.html', form_class=CustomPasswordResetForm), name='password_reset'),
@@ -33,8 +33,3 @@ urlpatterns = [
     
     path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='accounts/password_reset_complete.html'), name='password_reset_complete'),
 ]
-
-
-
-
-

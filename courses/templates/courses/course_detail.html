@@ -9,22 +9,63 @@
     <!-- Bootstrap Icons (Optional for extra polish) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
-<body class="bg-body-secondary">
+<body class="bg-body-secondary d-flex flex-column min-vh-100">
+
+    <header class="p-3 text-bg-dark"> 
+        <div class="container"> 
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start"> 
+                <!-- Logo -->
+                <a href="{% url 'home' %}" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none me-3"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-mortarboard-fill text-warning me-2" viewBox="0 0 16 16">
+                        <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.14 3.742a.5.5 0 0 0 0 .882l7.14 3.742a.5.5 0 0 0 .422 0l7.14-3.742a.5.5 0 0 0 0-.882z"/>
+                        <path d="M4.176 9.032a.5.5 0 0 0-.656.327 5.5 5.5 0 0 0-.294 2.058c.244 1.954 1.948 3.583 3.974 3.583 2.026 0 3.73-1.629 3.974-3.583a5.5 5.5 0 0 0-.294-2.058.5.5 0 0 0-.656-.327 4.5 4.5 0 0 1-.502 2.012c-.438.77-1.192 1.438-2.522 1.438s-2.084-.669-2.522-1.438a4.5 4.5 0 0 1-.502-2.012z"/>
+                    </svg>
+                    <span class="fs-4 fw-bold">EduParadise</span>
+                </a> 
+                
+                <!-- Navigation -->
+                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0"> 
+                    <li><a href="{% url 'home' %}" class="nav-link px-2 text-white opacity-75">Home</a></li> 
+                    <li><a href="{% url 'course_list' %}" class="nav-link px-2 text-warning fw-bold">Courses</a></li> 
+                    {% comment %} <li><a href="#" class="nav-link px-2 text-white opacity-75">FAQs</a></li> 
+                    <li><a href="#" class="nav-link px-2 text-white opacity-75">About</a></li>  {% endcomment %}
+                    <li><a href="{% url 'student_dashboard' %}" class="nav-link px-2 text-white opacity-75">My Courses</a></li>
+                </ul> 
+
+                <!-- Auth Buttons / Conditional Logout -->
+                <div class="text-end"> 
+                    {% if request.user.is_authenticated %}
+                        <form action="{% url 'logout' %}" method="post" class="mb-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm px-3">Logout</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Login</a> 
+                        <a href="{% url 'signup' %}" class="btn btn-warning fw-semibold">Sign-up</a> 
+                    {% endif %}
+                </div>
+            </div> 
+        </div> 
+    </header>
 
     <!-- Navbar / Back Link Header -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <nav class="navbar mb-0 pb-0 mt-3">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'course_list' %}"><i class="bi bi-arrow-left"></i> Back to Courses</a>
+            {% comment %} <a class="navbar-brand" href="{% url 'course_list' %}"><i class="bi bi-arrow-left"></i> Back to Courses</a> {% endcomment %}
+            <a class="navbar-brand" href="{% url 'course_list' %}"><button type="button" class="btn btn-outline-secondary">Back to Courses</button></a>
         </div>
     </nav>
 
-    <div class="container my-5">
+    <div class="container my-3">
         <div class="row g-5">
             <!-- Left Column: Course Image & Quick Meta -->
             <div class="col-lg-4">
                 <div class="card shadow-sm border-0 mb-4">
                     {% if object.course_image %}
-                        <img src="{{ object.course_image.url }}" alt="{{ object.course_title }}" class="card-img-top rounded-top" style="height: 250px; object-fit: cover;">
+                        {% comment %} <img src="{{ object.course_image.url }}" alt="{{ object.course_title }}" class="card-img-top rounded-top" style="height: 250px; object-fit: cover;"> {% endcomment %}
+                        <div class="bg-dark rounded-top d-flex align-items-center justify-content-center" style="height: 250px; overflow: hidden;">
+                            <img src="{{ object.course_image.url }}" alt="{{ object.course_title }}" class="w-100 h-100 object-fit-contain">
+                        </div>
                     {% else %}
                         <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded-top" style="height: 250px;">No Image Available</div>
                     {% endif %}
@@ -35,12 +76,136 @@
                         </div>
                         <hr>
                         <p class="text-muted mb-0"><small><strong>Instructor:</strong> {{ object.instructor.username }}</small></p>
+
+                        {% comment %} <div class="d-flex justify-content-around m-3">
+                            {% if request.user.is_authenticated and perms.courses.can_edit_courses %}
+                                <a href="{% url 'course_update' course.pk %}" class="btn btn-primary">Update</a>
+                            {% endif %}
+
+                            {% if request.user.is_authenticated and perms.courses.can_delete_courses %}
+                                <a href="{% url 'course_delete' course.pk %}" class="btn btn-primary">Delete</a>
+                            {% endif %}
+
+                            {% if request.user.is_authenticated %}
+                                <form action="{% url 'enroll_course' object.pk %}" method="post" class="mt-4">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success btn-lg px-4 fw-semibold">
+                                        <i class="fa-solid fa-graduation-cap me-2"></i> Enroll
+                                    </button>
+                                </form>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg px-4 mt-4">
+                                    Log in to Enroll
+                                </a>
+                            {% endif %}
+
+                        </div> {% endcomment %}
+
+                        <div class="d-flex justify-content-around align-items-center m-3 flex-wrap gap-2">
+                            {% if request.user.is_authenticated  and perms.courses.can_edit_courses %}
+                                <a href="{% url 'course_update' course.pk %}" class="btn btn-primary">Update</a>
+                            {% endif %}
+
+                            {% if request.user.is_authenticated and perms.courses.can_delete_courses %}
+                                <a href="{% url 'course_delete' course.pk %}" class="btn btn-primary">Delete</a>
+                            {% endif %}
+
+                            
+                            {% comment %} {% if request.user.is_authenticated %}
+                                {% if is_enrolled %}
+                                    <a href="{% url 'student_dashboard' %}" class="btn btn-success px-3 fw-semibold">
+                                        <i class="bi bi-check-circle-fill me-2"></i> Already Enrolled
+                                    </a>
+                                {% else %}
+                                    <form action="{% url 'enroll_course' object.pk %}" method="post" class="d-inline m-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success px-3 fw-semibold">
+                                            <i class="fa-solid fa-graduation-cap me-2"></i> Enroll
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% else %}
+                                <a href="{% url 'login' %}" class="btn btn-outline-primary px-3">
+                                    Log in to Enroll
+                                </a>
+                            {% endif %} {% endcomment %}
+
+                            {% comment %} {% if request.user.is_authenticated %}
+                                {% if is_enrolled %}
+                                    <a href="{% url 'student_dashboard' %}" class="btn btn-success px-3 fw-semibold">
+                                        <i class="bi bi-check-circle-fill me-2"></i> Already Enrolled
+                                    </a>
+                                {% elif course.enrollment_end_date and now > course.enrollment_end_date %}
+                                    <div class="text-center">
+                                        <button class="btn btn-secondary px-3 fw-semibold w-100" disabled>
+                                            Enrollment Closed
+                                        </button>
+                                        <small class="text-danger d-block mt-1">The deadline to enroll has passed.</small>
+                                    </div>
+                                {% else %}
+                                    <form action="{% url 'enroll_course' object.pk %}" method="post" class="d-inline m-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success px-3 fw-semibold">
+                                            <i class="fa-solid fa-graduation-cap me-2"></i> Enroll
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% else %}
+                                <a href="{% url 'login' %}" class="btn btn-outline-primary px-3">
+                                    Log in to Enroll
+                                </a>
+                            {% endif %} {% endcomment %}
+
+                            {% if request.user.is_authenticated %}
+                                {% if is_enrolled %}
+                                    <a href="{% url 'student_dashboard' %}" class="btn btn-success px-3 fw-semibold">
+                                        <i class="bi bi-check-circle-fill me-2"></i> Already Enrolled
+                                    </a>
+                                {% elif course.enrollment_start_date and now < course.enrollment_start_date %}
+                                    <div class="text-center w-100">
+                                        <button class="btn btn-secondary px-3 fw-semibold w-100" disabled>
+                                            Enrollment Not Started
+                                        </button>
+                                        <small class="text-muted d-block mt-1">Starts on {{ course.enrollment_start_date|date:"M d, Y" }}</small>
+                                    </div>
+                                {% elif course.enrollment_end_date and now > course.enrollment_end_date %}
+                                    <div class="text-center w-100">
+                                        <button class="btn btn-secondary px-3 fw-semibold w-100" disabled>
+                                            Enrollment Closed
+                                        </button>
+                                        <small class="text-danger d-block mt-1">The deadline to enroll has passed.</small>
+                                    </div>
+                                {% else %}
+                                    <form action="{% url 'enroll_course' object.pk %}" method="post" class="d-inline m-0 w-100">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success px-3 fw-semibold w-100">
+                                            <i class="fa-solid fa-graduation-cap me-2"></i> Enroll
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% else %}
+                                <a href="{% url 'login' %}" class="btn btn-outline-primary px-3 w-100 text-center">
+                                    Log in to Enroll
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Right Column: Title, Description, and Schedule -->
             <div class="col-lg-8">
+
+                <!-- Django Messages Alert Banner -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
                 <div class="card shadow-sm border-0 p-4 mb-4">
                     <h1 class="fw-bold mb-3">{{ object.course_title }}</h1>
                     <h4 class="text-secondary mb-3">About This Course</h4>
@@ -63,6 +228,58 @@
             </div>
         </div>
     </div>
+
+    <!-- Footer Section (Same as Home Page) -->
+    <footer class="bg-dark text-white pt-5 pb-4 mt-auto">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-mortarboard-fill text-warning me-2" viewBox="0 0 16 16">
+                            <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.14 3.742a.5.5 0 0 0 0 .882l7.14 3.742a.5.5 0 0 0 .422 0l7.14-3.742a.5.5 0 0 0 0-.882z"/>
+                            <path d="M4.176 9.032a.5.5 0 0 0-.656.327 5.5 5.5 0 0 0-.294 2.058c.244 1.954 1.948 3.583 3.974 3.583 2.026 0 3.73-1.629 3.974-3.583a5.5 5.5 0 0 0-.294-2.058.5.5 0 0 0-.656-.327 4.5 4.5 0 0 1-.502 2.012c-.438.77-1.192 1.438-2.522 1.438s-2.084-.669-2.522-1.438a4.5 4.5 0 0 1-.502-2.012z"/>
+                        </svg>
+                        <span class="fs-4 fw-bold text-white">EduParadise</span>
+                    </div>
+                    <p class="text-secondary small">Empowering global learners with modern data science, interactive engineering pipelines, and production-grade curricula.</p>
+                </div>
+
+                {% comment %} <div class="col-lg-2 col-6 col-md-3">
+                    <h5 class="fw-bold mb-3 text-warning fs-6 text-uppercase">Explore</h5>
+                    <ul class="list-unstyled d-flex flex-column gap-2 small">
+                        <li><a href="{% url 'course_list' %}" class="text-secondary text-decoration-none">All Courses</a></li>
+                        <li><a href="#" class="text-secondary text-decoration-none">Learning Paths</a></li>
+                        <li><a href="#" class="text-secondary text-decoration-none">Expert Mentors</a></li>
+                    </ul>
+                </div> {% endcomment %}
+
+                {% comment %} <div class="col-lg-2 col-6 col-md-3">
+                    <h5 class="fw-bold mb-3 text-warning fs-6 text-uppercase">Support</h5>
+                    <ul class="list-unstyled d-flex flex-column gap-2 small">
+                        <li><a href="#" class="text-secondary text-decoration-none">Help Center</a></li>
+                        <li><a href="#" class="text-secondary text-decoration-none">FAQs</a></li>
+                        <li><a href="#" class="text-secondary text-decoration-none">Privacy Policy</a></li>
+                    </ul>
+                </div> {% endcomment %}
+
+                {% comment %} <div class="col-lg-4 col-md-12">
+                    <h5 class="fw-bold mb-3 text-white fs-6 text-uppercase">Stay Updated</h5>
+                    <form class="d-flex gap-2 mt-3">
+                        <input type="email" class="form-control bg-dark border-secondary text-white" placeholder="Your email address" required>
+                        <button class="btn btn-warning px-3 fw-bold text-nowrap" type="submit">Subscribe</button>
+                    </form>
+                </div> {% endcomment %}
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row justify-content-between pt-4 mt-4 border-top border-secondary text-secondary small">
+                <p>&copy; 2026 EduParadise Inc. All rights reserved.</p>
+                {% comment %} <div class="d-flex gap-3">
+                    <span><i class="fa-solid fa-globe me-1"></i> English (US)</span>
+                </div> {% endcomment %}
+            </div>
+        </div>
+    </footer>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

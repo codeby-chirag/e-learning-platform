@@ -10,6 +10,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 
 from .forms import UserRegistrationForm
+from .tasks import send_activation_email_task
 
 
 def home_view(request):
@@ -27,16 +28,17 @@ def signup_view(request):
             relative_activation_url = reverse('activate', kwargs={'uidb64': uid, 'token': token})
             activation_link = request.build_absolute_uri(relative_activation_url)
             
-            subject = "Email for account Activation!"
-            message = f"Hi {user.first_name},\n\nPlease click the link below to activate your account:\n{activation_link}"
+            # subject = "Email for account Activation!"
+            # message = f"Hi {user.first_name},\n\nPlease click the link below to activate your account:\n{activation_link}"
             
-            send_mail(
-                subject, 
-                message, 
-                settings.DEFAULT_FROM_EMAIL, 
-                [user.email], 
-                fail_silently=DEBUG_MODE_CHECK(settings.DEBUG)
-            )
+            # send_mail(
+            #     subject, 
+            #     message, 
+            #     settings.DEFAULT_FROM_EMAIL, 
+            #     [user.email], 
+            #     fail_silently=DEBUG_MODE_CHECK(settings.DEBUG)
+            # )
+            send_activation_email_task.delay(user.email, activation_link, user.first_name)
             
             return redirect('signup_success') 
     else:
