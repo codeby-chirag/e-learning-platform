@@ -34,13 +34,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "django_crontab",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "accounts",
+    "accounts.apps.AccountsConfig",
     "courses",
     "enrollment",
     'social_django',    
@@ -184,3 +185,12 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
 CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Connects Celery to local Redis server broker
 CELERY_ACCEPT_CONTENT = ['json']  # Restricts accepted task data formats to JSON only
 CELERY_TASK_SERIALIZER = 'json'  # Serializes outgoing task payloads into JSON format
+
+CRONJOBS = [
+    # Runs everyday at midnight 00:00
+    ('0 0 * * *', 'enrollment.cron.send_daily_admin_report'),
+    
+    # NEW STUDENT REMINDER Runs every day at 09:00 AM
+    ('0 9 * * *', 'courses.cron.remind_upcoming_deadlines'),
+    ('0 9 * * *', 'courses.cron.announce_new_course_launches'),
+]

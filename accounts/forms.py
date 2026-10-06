@@ -73,14 +73,12 @@ class UserRegistrationForm(forms.ModelForm):
             if commit:
                 user.save()
                 
-                UserProfile.objects.create(
-                    user=user,
-                    mobile_number=self.cleaned_data.get('mobile_number'),
-                    gender=self.cleaned_data.get('gender'),
-                    birthdate=self.cleaned_data.get('birthdate')
-                )
+                profile = user.userprofile
+                profile.mobile_number = self.cleaned_data.get('mobile_number')
+                profile.gender = self.cleaned_data.get('gender')
+                profile.birthdate = self.cleaned_data.get('birthdate')
+                profile.save()
         return user
-
 
 class CustomAuthenticationForm(AuthenticationForm):
     username = forms.CharField(
