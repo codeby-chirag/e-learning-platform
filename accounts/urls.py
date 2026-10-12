@@ -6,6 +6,7 @@ from .forms import CustomAuthenticationForm, CustomPasswordResetForm
 from .views import (
     activate_email_view,
     profile_view,
+    request_platform_report_view,
     signup_success_view,
     signup_view,
 )
@@ -16,11 +17,7 @@ urlpatterns = [
     path('profile/', profile_view, name='profile'), 
     path('activate/<uidb64>/<token>/', activate_email_view, name='activate'), 
     
-    # path('login/', LoginView.as_view(template_name='accounts/login.html'), name='login'),
-    path('login/', LoginView.as_view(
-            template_name='accounts/login.html', 
-            authentication_form=CustomAuthenticationForm
-        ), name='login'),
+    path('login/', LoginView.as_view(template_name='accounts/login.html', authentication_form=CustomAuthenticationForm), name='login'),
     
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     
@@ -32,4 +29,7 @@ urlpatterns = [
     path('password-reset-confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='accounts/password_reset_confirm.html'), name='password_reset_confirm'),
     
     path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='accounts/password_reset_complete.html'), name='password_reset_complete'),
+
+    path('request-report/', request_platform_report_view, name='request_platform_report'),
+
 ]

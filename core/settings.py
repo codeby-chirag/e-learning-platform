@@ -34,6 +34,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django_crontab",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -69,6 +70,10 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                
+                "social_django.context_processors.backends",
+                "social_django.context_processors.login_redirect",
+
             ],
         },
     },
@@ -194,3 +199,32 @@ CRONJOBS = [
     ('0 9 * * *', 'courses.cron.remind_upcoming_deadlines'),
     ('0 9 * * *', 'courses.cron.announce_new_course_launches'),
 ]
+
+# Change the default root execution handler away from WSGI to ASGI
+# ASGI_APPLICATION = 'e_learning_webplatform.asgi.application'
+ASGI_APPLICATION = 'core.asgi.application'
+
+
+# Configure Redis as the internal background messaging layer radio tower
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [{
+                "address": "redis://127.0.0.1:6379/0",
+                "socket_timeout": 30.0,
+                "socket_connect_timeout": 30.0,
+            }],
+            "symmetric_encryption_keys": [SECRET_KEY],
+            "capacity": 1500,  
+            "expiry": 10,      
+        },
+    },
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+    }
+}

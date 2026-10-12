@@ -16,5 +16,8 @@
         {% csrf_token %}
         <button type="submit">Log Out</button>
     </form>
+    {% if request.user.is_authenticated %}
+        <script src="{% static 'js/notifications.js' %}"></script>
+    {% endif %}
 </body>
 </html>

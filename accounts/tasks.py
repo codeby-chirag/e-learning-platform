@@ -1,16 +1,18 @@
 import csv
-import os
+import io
+import os  # noqa: F401
 
 from celery import shared_task
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
+from django.core.cache import cache
+from django.core.mail import EmailMessage, send_mail
 
 from courses.models import Course
-from enrollment.models import Enrollment  # Adjust imports based on your app structure
+from enrollment.models import Enrollment
 
 
-@shared_task   # Marks this function as an asynchronous background task for Celery
+@shared_task
 def send_activation_email_task(user_email, activation_link, first_name):
     subject = "Email for account Activation!"
     message = f"Hi {first_name},\n\nPlease click the link below to activate your account:\n{activation_link}"
@@ -18,32 +20,71 @@ def send_activation_email_task(user_email, activation_link, first_name):
     
 @shared_task 
 def send_password_reset_email_task(subject, message, from_email, recipient_list):
-    send_mail(subject, message, from_email, recipient_list, fail_silently=False)  # Safely dispatches the email in the background worker process
-    
+    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+
 User = get_user_model()
 
 @shared_task
-def generate_platform_report_task(admin_email):
-    # 1. Gather statistics from the database
-    total_users = User.objects.count()
-    total_courses = Course.objects.count()
-    total_enrollments = Enrollment.objects.count() if 'Enrollment' in globals() else 0
+def generate_enrollment_report_task(admin_email):
+    cache_key = "enrollment_report_csv"
+    csv_data = cache.get(cache_key)
+    
+    if not csv_data:
+        enrollments = Enrollment.objects.select_related('student', 'course').all()
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(["Student Username", "Student Email", "Course Title", "Enrolled At", "Status"])
+        for e in enrollments:
+            writer.writerow([e.student.username, e.student.email, e.course.course_title, e.enrolled_at, "Active" if e.is_active else "Inactive"])
+        csv_data = buf.getvalue()
+        cache.set(cache_key, csv_data, timeout=3600)
 
-    # 2. Create a summary text or CSV report content
-    report_content = (
-        f"--- E-Learning Platform Report ---\n"
-        f"Total Registered Users: {total_users}\n"
-        f"Total Courses Available: {total_courses}\n"
-        f"Total Enrollments: {total_enrollments}\n"
-    )
+    email = EmailMessage("Enrollment Report", "Attached is the enrollment report.", settings.DEFAULT_FROM_EMAIL, [admin_email])
+    email.attach("enrollment_report.csv", csv_data, "text/csv")
+    email.send(fail_silently=False)
+    return f"Enrollment report sent to {admin_email}"
 
-    # 3. Option A: Email the report to the admin asynchronously
-    send_mail(
-        subject="Asynchronous Platform Report Ready",
-        message=report_content,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[admin_email],
-        fail_silently=False,
-    )
+@shared_task
+def generate_course_report_task(admin_email):
+    cache_key = "course_report_csv"
+    csv_data = cache.get(cache_key)
+    
+    if not csv_data:
+        courses = Course.objects.all()
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(["Course Title", "Description", "Created At"])
+        for c in courses:
+            # Safely check for description or course_description field names
+            desc = getattr(c, 'description', getattr(c, 'course_description', 'N/A'))
+            created = getattr(c, 'created_at', getattr(c, 'date_created', 'N/A'))
+            title = getattr(c, 'course_title', getattr(c, 'title', str(c)))
+            writer.writerow([title, desc, created])
+            
+        csv_data = buf.getvalue()
+        cache.set(cache_key, csv_data, timeout=3600)
 
-    return f"Report successfully generated and emailed to {admin_email}"
+    email = EmailMessage("Course Details Report (CSV)", "Attached is the course details report.", settings.DEFAULT_FROM_EMAIL, [admin_email])
+    email.attach("course_report.csv", csv_data, "text/csv")
+    email.send(fail_silently=False)
+    return f"Course report sent to {admin_email}"
+
+@shared_task
+def generate_student_report_task(admin_email):
+    cache_key = "student_report_csv"
+    csv_data = cache.get(cache_key)
+    
+    if not cache.get(cache_key):
+        students = User.objects.filter(is_staff=False)
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(["Username", "First Name", "Last Name", "Email", "Date Joined"])
+        for s in students:
+            writer.writerow([s.username, s.first_name, s.last_name, s.email, s.date_joined])
+        csv_data = buf.getvalue()
+        cache.set(cache_key, csv_data, timeout=3600)
+
+    email = EmailMessage("Student Details Report", "Attached is the student details report.", settings.DEFAULT_FROM_EMAIL, [admin_email])
+    email.attach("student_report.csv", csv_data, "text/csv")
+    email.send(fail_silently=False)
+    return f"Student report sent to {admin_email}"

@@ -1,9 +1,10 @@
-from django.contrib.admin.views.decorators import staff_member_required
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.contrib.auth.mixins import (
     LoginRequiredMixin,
     PermissionRequiredMixin,
 )
-from django.http import HttpResponse
+from django.core.cache import cache
 from django.urls import reverse_lazy
 from django.views.generic import (
     CreateView,
@@ -13,7 +14,6 @@ from django.views.generic import (
     UpdateView,
 )
 
-from accounts.tasks import generate_platform_report_task
 from enrollment.models import Enrollment
 
 from .forms import CourseForm
@@ -24,26 +24,38 @@ class CourseListView(ListView):
     model = Course
     template_name = 'courses/course_list.html'
     context_object_name = 'courses'  
-
-
+    
 class CourseCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Course
     form_class = CourseForm
     template_name = 'courses/course_form.html'
-    success_url = reverse_lazy(
-        'course_list'
-    ) 
+    success_url = reverse_lazy('course_list') 
     
     permission_required = 'courses.can_create_courses'
-    # Raises 403 Forbidden error if unauthorized
-    raise_exception = (
-        True  
-    )
+    raise_exception = True  
 
     def form_valid(self, form):
-    # assign the current logged-in user as the instructor
+        # Assign the current logged-in user as the instructor
         form.instance.instructor = self.request.user
-        return super().form_valid(form)
+        
+        # Let the default CreateView finish saving the object to the database cleanly
+        response = super().form_valid(form)
+        
+        # TRIGGER Extract the newly saved course title
+        course_title = self.object.course_title
+        
+        channel_layer = get_channel_layer()
+        
+        async_to_sync(channel_layer.group_send)(
+            "global_announcements",
+            {
+                "type": "send_notification",
+                "notification_type": "new_course",
+                "message": f"New Course Launch: '{course_title}' is now available!"
+            }
+        )
+        
+        return response
 
 
 class CourseDetailView(DetailView):
@@ -54,9 +66,17 @@ class CourseDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
+        
         if user.is_authenticated:
-            # Check if an enrollment record exists for this user and course
-            context['is_enrolled'] = Enrollment.objects.filter(student=user, course=self.object).exists()
+            # Create a unique cache key for this user and course enrollment status
+            cache_key = f"enrollment_status_{user.id}_{self.object.pk}"
+            is_enrolled = cache.get(cache_key)
+            
+            if is_enrolled is None:
+                is_enrolled = Enrollment.objects.filter(student=user, course=self.object).exists()
+                cache.set(cache_key, is_enrolled, timeout=900)
+                
+            context['is_enrolled'] = is_enrolled
         else:
             context['is_enrolled'] = False
         return context
@@ -73,9 +93,3 @@ class CourseDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     template_name = 'courses/course_confirm_delete.html'
     permission_required = 'courses.can_delete_courses'
     success_url = '/courses/'
-
-@staff_member_required
-def trigger_report_view(request):
-    generate_platform_report_task.delay("chirag.ms46@gmail.com")
-    
-    return HttpResponse("Report generation started! Check your inbox.")

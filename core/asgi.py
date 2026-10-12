@@ -9,13 +9,14 @@ https://docs.djangoproject.com/en/6.1/howto/deployment/asgi/
 
 import os
 
-import accounts.routing
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 
-# Tells Django where your settings live
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'e_learning_webplatform.settings')
+import accounts.routing
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+
 
 # The main switchboard that inspects the type of incoming connection
 application = ProtocolTypeRouter({

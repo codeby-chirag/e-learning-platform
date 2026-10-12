@@ -20,8 +20,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-from accounts.views import home_view
-from courses.views import trigger_report_view
+from accounts.views import home_view, request_platform_report_view
 
 urlpatterns = [
     path('', home_view, name='home'),             
@@ -30,6 +29,6 @@ urlpatterns = [
     path('courses/', include('courses.urls')),
     path('auth/', include('social_django.urls', namespace='social')), 
     path('enrollment/', include('enrollment.urls')),
-    path('generate-report/', trigger_report_view, name='generate_report'),
+    path('request-report/', request_platform_report_view, name='request_platform_report'),
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

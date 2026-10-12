@@ -10,4 +10,4 @@ urlpatterns = [
     path('dashboard/', StudentDashboardView.as_view(), name='student_dashboard'),
     
     path('<int:pk>/enroll/', enroll_course, name='enroll_course'),
-    ]
+]
