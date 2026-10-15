@@ -1,0 +1,18 @@
+# Python / Django
+__pycache__/
+*.py[cod]
+*$py.class
+db.sqlite3
+media/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Environment configuration file (CRITICAL)
+.env
+
+# IDE files
+.vscode/
+.idea/
