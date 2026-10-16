@@ -23,7 +23,7 @@ class UserProfile(models.Model):
         if not self.birthdate:
             return None
         
-        today = date.today()  # noqa: DTZ011
+        today = date.today()  # noqa: DTZ011, RUF100
         age = today.year - self.birthdate.year
         
         if (today.month, today.day) < (self.birthdate.month, self.birthdate.day):
@@ -35,9 +35,7 @@ class UserProfile(models.Model):
         return f"{self.user.first_name} {self.user.last_name}'s Profile"
     
 class UserActivityLog(models.Model):
-    user = models.ForeignKey(User, null=True, blank=True,
-                            on_delete=models.SET_NULL, related_name='activity_logs')
-    
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='activity_logs')
     path = models.CharField(max_length=255)
     method = models.CharField(max_length=10)
     status_code = models.PositiveSmallIntegerField()

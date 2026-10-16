@@ -35,9 +35,13 @@ class UserRegistrationForm(forms.ModelForm):
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control form-control-lg'})
     )
     
+    # GENDER_CHOICES = [  # noqa: RUF012
+    #     ('male', 'Male'),
+    #     ('female', 'Female'),
+    # ]
     GENDER_CHOICES = [  # noqa: RUF012
-        ('male', 'Male'),
-        ('female', 'Female'),
+        ('Male', 'Male'),
+        ('Female', 'Female'),
     ]
     gender = forms.ChoiceField(
         choices=GENDER_CHOICES,
